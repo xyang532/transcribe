@@ -8,6 +8,7 @@ import conversation
 import constants
 from tsutils import app_logging as al
 from tsutils import duration, utilities
+from global_vars import TranscriptionGlobals, T_GLOBALS
 
 
 root_logger = al.get_logger()
@@ -27,6 +28,7 @@ class GPTResponder:
     enabled: bool = False
     model: str = None
     llm_client = None
+    global_vars_module: TranscriptionGlobals = T_GLOBALS
 
     def __init__(self,
                  config: dict,
@@ -132,6 +134,8 @@ class GPTResponder:
                                           response="  ", pop=False)
                 collected_messages = ""
                 for chunk in multi_turn_response:
+                    if self.global_vars_module.interrupt_generation:
+                        return "Response generation interrupted."
                     chunk_message = chunk.choices[0].delta  # extract the message
                     if chunk_message.content:
                         message_text = chunk_message.content

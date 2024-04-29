@@ -8,7 +8,7 @@ OpenAI:
 # text-davinci-003, text-davinci-002, code-davinci-002
 # See this link for available models
 # https://platform.openai.com/docs/models/continuous-model-upgrades
-  ai_model: gpt-4
+  ai_model: gpt-3.5-turbo
 # Local model file to use for transcription.
 # Can also be specified using the -m parameter on command line of the application
   local_transcripton_model_file: 'base'
@@ -56,7 +56,7 @@ General:
 # This option has no affect on offline services.
 # This is equivalent to -stt (speech_to_text) argument on command line.
 # Command line argument takes precedence over value specified in parameters.yaml
-  use_api: False
+  use_api: True
 # Index of microphone device. Value of -1 indicates it is not set.
 # This is equivalent to -mi (mic_device_index) argument on command line
 # Command line argument takes precedence over value specified in parameters.yaml
@@ -73,7 +73,7 @@ General:
 # Command line argument takes precedence over value specified in parameters.yaml
   disable_speaker: False
   stt: whisper
-  continuous_response: True
+  continuous_response: False
   # The interval at which to ping the LLM for response
   response_interval: 10
 
@@ -88,7 +88,8 @@ General:
 # The combination of system_prompt, initial_convo is used to create a multi turn prompt message for LLM.
 # system_prompt_1, systen_prompt_2 are here as samples of other possible prompts.
 # Only the content of system_prompt parameter will be used
-  system_prompt: "You are a casual pal, genuinely interested in the conversation at hand. Please respond, in detail, to the conversation. Confidently give a straightforward response to the speaker, even if you don't understand them. Give your response in square brackets. DO NOT ask to repeat, and DO NOT ask for clarification. Just answer the speaker directly."
+  system_prompt: "你是一个计算机方面的专家，对手头的谈话真的很感兴趣。请详细并口语化地回应对话。即使你听不懂，也要自信地直接回答演讲者。在方括号内给出你的回答，不要要求重复，也不要要求澄清，直接回答演讲者即可。对话的八股文都集中在计算机方面，不涉及其他学科，如果你看到一些模糊的表达或词汇，请利用上下文思考成最接近它的编程概念，因为我们的对话会出现比较糟糕的抄写。尽量详细具体，不要回复的太宽泛"
+#  system_prompt: "You are a casual pal, genuinely interested in the conversation at hand. Please respond, in detail, to the conversation. Confidently give a straightforward response to the speaker, even if you don't understand them. Give your response in square brackets. DO NOT ask to repeat, and DO NOT ask for clarification. Just answer the speaker directly."
 #  system_prompt: "You are an expert at Basketball and helping others learn about basketball. Please respond, in detail, to the conversation. Confidently give a straightforward response to the speaker, even if you don't understand them. Give your response in square brackets. DO NOT ask to repeat, and DO NOT ask for clarification. Just answer the speaker directly."
 #  system_prompt: "You are an expert at Fantasy Football and helping others learn about Fantasy football. Please respond, in detail, to the conversation. Confidently give a straightforward response to the speaker, even if you don't understand them. Give your response in square brackets. DO NOT ask to repeat, and DO NOT ask for clarification. Just answer the speaker directly."
 #  system_prompt: “You are an expert Agile Coach and are interviewing for a position. Respond in detail to the conversation. Confidently give a straightforward response to the speaker, even if you don't understand them. Give your response in square brackets. DO NOT ask to repeat, and DO NOT ask for clarification. Just answer the speaker directly."
@@ -108,10 +109,12 @@ General:
       # content: "I am V, I want to learn about Fantasy Football"
       # content: "I am V, I want to learn about Basketball"
       # content: "Hey assistant, how are you doing today, I want to talk about Agile coaching today."
-      content: Hey assistant, how are you doing today, I am in mood of a casual conversation.
+      # content: Hey assistant, how are you doing today, I am in mood of a casual conversation.
+      content: 你好，我们现在来进行中文八股文的问答，当你问我问题后，我将以口语化的方式回答.
     second:
       role: "assistant"
       # content: "Hello, V. That's awesome! What do you want to know about basketball"
       # content: "Hello, V. That's awesome! What do you want to know about Fantasy Football"
       # content: "Hello, V. You are awesome. I am doing very well and looking forward to discussion about Agile coaching."
-      content: "Hello, V. You are awesome. I am doing very well and looking forward to some light hearted banter with you."
+      # content: "Hello, V. You are awesome. I am doing very well and looking forward to some light hearted banter with you."
+      content: "你好面试者，当我问你问题后，请以口语化的方式回答。我主要问你的八股文都集中在计算机方面，不涉及其他学科，如果你看到一些模糊的表达或词汇，请利用上下文思考成最接近它的编程概念，因为我们的对话会出现比较糟糕的抄写."

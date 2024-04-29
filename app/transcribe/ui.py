@@ -84,9 +84,12 @@ class UICallbacks:
         """Get response from LLM right away
            Update the Response UI with the response
         """
+        global global_vars_module
         if self.global_vars.update_response_now:
             # We are already in the middle of getting a response
-            return
+            global_vars_module.interrupt_generation = True
+            time.sleep(0.5)
+            # return
         # We need a separate thread to ensure UI is responsive as responses are
         # streamed back. Without the thread UI appears stuck as we stream the
         # responses back
@@ -110,7 +113,8 @@ class UICallbacks:
             write_in_textbox(self.global_vars.response_textbox, response_string)
         write_in_textbox(self.global_vars.response_textbox, response_string)
         self.global_vars.response_textbox.configure(state="disabled")
-        self.global_vars.response_textbox.see("end")
+        # self.global_vars.response_textbox.see("end")
+        global_vars_module.interrupt_generation = False
 
     def get_response_selected_now(self):
         """Get response from LLM right away for selected_text
@@ -352,7 +356,7 @@ def update_response_ui(responder: gr.GPTResponder,
         textbox.configure(state="normal")
         write_in_textbox(textbox, response)
         textbox.configure(state="disabled")
-        textbox.see("end")
+        # textbox.see("end")
 
         update_interval = int(update_interval_slider.get())
         responder.update_response_interval(update_interval)
@@ -447,8 +451,12 @@ def create_ui_components(root, config: dict):
     response_now_button = ctk.CTkButton(root, text="Suggest Response Now", command=None)
     response_now_button.grid(row=2, column=1, padx=10, pady=3, sticky="nsew")
 
+    clear_transcript_button = ctk.CTkButton(root, text="Clear Audio Transcript",
+                                            command=lambda: global_vars.transcriber.clear_transcriber_context(global_vars.audio_queue))
+    clear_transcript_button.grid(row=3, column=1, padx=10, pady=3, sticky="nsew")
+
     read_response_now_button = ctk.CTkButton(root, text="Suggest Response and Read", command=None)
-    read_response_now_button.grid(row=3, column=1, padx=10, pady=3, sticky="nsew")
+    read_response_now_button.grid(row=4, column=1, padx=10, pady=3, sticky="nsew")
 
     summarize_button = ctk.CTkButton(root, text="Summarize", command=None)
     summarize_button.grid(row=4, column=1, padx=10, pady=3, sticky="nsew")
@@ -498,6 +506,7 @@ def create_ui_components(root, config: dict):
         continuous_response_button.configure(state='disabled')
         response_now_button.configure(state='disabled')
         continuous_response_button.configure(state='disabled')
+        clear_transcript_button.configure(state='disabled')
         read_response_now_button.configure(state='disabled')
         summarize_button.configure(state='disabled')
 
