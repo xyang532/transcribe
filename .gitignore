@@ -17,3 +17,6 @@ app/transcribe/logs/whisper.cpp.txt
 app/transcribe/mic.wav.bak
 app/transcribe/speaker.wav.bak
 app/transcribe/logs/deep.json
+app/transcribe/override.yaml
+app/transcribe/test.ipynb
+app/transcribe/parameters.yaml
