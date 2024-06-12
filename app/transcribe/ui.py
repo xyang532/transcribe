@@ -88,7 +88,8 @@ class UICallbacks:
         if self.global_vars.update_response_now:
             # We are already in the middle of getting a response
             global_vars_module.interrupt_generation = True
-            time.sleep(0.5)
+            while global_vars_module.interrupt_generation:
+                time.sleep(0.5)
             # return
         # We need a separate thread to ensure UI is responsive as responses are
         # streamed back. Without the thread UI appears stuck as we stream the
@@ -105,6 +106,9 @@ class UICallbacks:
         self.global_vars.update_response_now = True
         response_string = self.global_vars.responder.generate_response_from_transcript_no_check()
         self.global_vars.update_response_now = False
+        if global_vars_module.interrupt_generation:
+            global_vars_module.interrupt_generation = False
+            return
         # Set event to play the recording audio if required
         if self.global_vars.read_response:
             self.global_vars.audio_player_var.speech_text_available.set()
@@ -114,7 +118,6 @@ class UICallbacks:
         write_in_textbox(self.global_vars.response_textbox, response_string)
         self.global_vars.response_textbox.configure(state="disabled")
         # self.global_vars.response_textbox.see("end")
-        global_vars_module.interrupt_generation = False
 
     def get_response_selected_now(self):
         """Get response from LLM right away for selected_text
@@ -353,10 +356,16 @@ def update_response_ui(responder: gr.GPTResponder,
     if global_vars_module.responder.enabled or global_vars_module.update_response_now:
         response = responder.response
 
+        # 获取当前滚动位置
+        current_scroll_position = textbox.yview()[0]
+
         textbox.configure(state="normal")
         write_in_textbox(textbox, response)
         textbox.configure(state="disabled")
         # textbox.see("end")
+
+        # 恢复之前的滚动位置
+        textbox.yview_moveto(current_scroll_position)
 
         update_interval = int(update_interval_slider.get())
         responder.update_response_interval(update_interval)

@@ -135,6 +135,8 @@ class GPTResponder:
                 collected_messages = ""
                 for chunk in multi_turn_response:
                     if self.global_vars_module.interrupt_generation:
+                        self._update_conversation(persona=constants.PERSONA_ASSISTANT,
+                                                  response=collected_messages, pop=True, interrupt=True)
                         return "Response generation interrupted."
                     chunk_message = chunk.choices[0].delta  # extract the message
                     if chunk_message.content:
@@ -250,7 +252,7 @@ class GPTResponder:
 
         return processed_response
 
-    def _update_conversation(self, response, persona, pop=False):
+    def _update_conversation(self, response, persona, pop=False, interrupt=False):
         """Update the internaal conversation state"""
         root_logger.info(GPTResponder._update_conversation.__name__)
         if response != '':
@@ -258,7 +260,7 @@ class GPTResponder:
             self.conversation.update_conversation(persona=persona,
                                                   text=response,
                                                   time_spoken=datetime.datetime.utcnow(),
-                                                  pop=pop)
+                                                  pop=pop, interrupt=interrupt)
 
     def respond_to_transcriber(self, transcriber):
         """Thread method to continously update the transcript

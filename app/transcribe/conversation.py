@@ -42,7 +42,7 @@ class Conversation:
         self.transcript_data[constants.PERSONA_ASSISTANT].clear()
         self.initialize_conversation()
 
-    def update_conversation(self, persona: str, text: str, time_spoken, pop: bool = False):
+    def update_conversation(self, persona: str, text: str, time_spoken, pop: bool = False, interrupt: bool = False):
         """Update conversation with new data
         Args:
         person: person this part of conversation is attributed to
@@ -63,7 +63,11 @@ class Conversation:
                 )):
             transcript.pop()
 
+        if interrupt:
+            return
+
         transcript.append((f"{persona}: [{text}]\n\n", time_spoken))
+        # print(self.transcript_data)
         # if (persona.lower() == 'assistant'):
         #    print(f'Assistant Transcript length after completion: {len(transcript)}')
         self.last_update = datetime.datetime.utcnow()
