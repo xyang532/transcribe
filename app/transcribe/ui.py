@@ -119,6 +119,28 @@ class UICallbacks:
         self.global_vars.response_textbox.configure(state="disabled")
         # self.global_vars.response_textbox.see("end")
 
+    def regenerate_response(self):
+        """Regenerate response from LLM
+        """
+        self.capture_action('Regenerate LLM response')
+        response_ui_thread = threading.Thread(target=self.regenerate_response_threaded,
+                                              name='RegenerateResponse')
+        response_ui_thread.daemon = True
+        response_ui_thread.start()
+    
+    def regenerate_response_threaded(self):
+        """Update response ui in a separate thread
+        """
+        self.global_vars.update_response_now = True
+        response_string = self.global_vars.responder.generate_response_from_transcript_no_check(regenerate=True)
+        self.global_vars.update_response_now = False
+        self.global_vars.response_textbox.configure(state="normal")
+        if response_string is not None and response_string != '':
+            write_in_textbox(self.global_vars.response_textbox, response_string)
+        write_in_textbox(self.global_vars.response_textbox, response_string)
+        self.global_vars.response_textbox.configure(state="disabled")
+        # self.global_vars.response_textbox.see("end")
+
     def get_response_selected_now(self):
         """Get response from LLM right away for selected_text
            Update the Response UI with the response
@@ -460,15 +482,18 @@ def create_ui_components(root, config: dict):
     response_now_button = ctk.CTkButton(root, text="Suggest Response Now", command=None)
     response_now_button.grid(row=2, column=1, padx=10, pady=3, sticky="nsew")
 
+    regenerate_button = ctk.CTkButton(root, text="Regenerate Response", command=None)
+    regenerate_button.grid(row=3, column=1, padx=10, pady=3, sticky="nsew")
+
     clear_transcript_button = ctk.CTkButton(root, text="Clear Audio Transcript",
                                             command=lambda: global_vars.transcriber.clear_transcriber_context(global_vars.audio_queue))
-    clear_transcript_button.grid(row=3, column=1, padx=10, pady=3, sticky="nsew")
+    clear_transcript_button.grid(row=4, column=1, padx=10, pady=3, sticky="nsew")
 
-    read_response_now_button = ctk.CTkButton(root, text="Suggest Response and Read", command=None)
-    read_response_now_button.grid(row=4, column=1, padx=10, pady=3, sticky="nsew")
+    # read_response_now_button = ctk.CTkButton(root, text="Suggest Response and Read", command=None)
+    # read_response_now_button.grid(row=5, column=1, padx=10, pady=3, sticky="nsew")
 
-    summarize_button = ctk.CTkButton(root, text="Summarize", command=None)
-    summarize_button.grid(row=4, column=1, padx=10, pady=3, sticky="nsew")
+    # summarize_button = ctk.CTkButton(root, text="Summarize", command=None)
+    # summarize_button.grid(row=5, column=1, padx=10, pady=3, sticky="nsew")
 
     update_interval_slider_label = ctk.CTkLabel(root, text="", font=("Arial", 12),
                                                 text_color="#FFFCF2")
@@ -516,8 +541,8 @@ def create_ui_components(root, config: dict):
         response_now_button.configure(state='disabled')
         continuous_response_button.configure(state='disabled')
         clear_transcript_button.configure(state='disabled')
-        read_response_now_button.configure(state='disabled')
-        summarize_button.configure(state='disabled')
+        # read_response_now_button.configure(state='disabled')
+        # summarize_button.configure(state='disabled')
 
     def show_context_menu(event):
         try:
@@ -529,7 +554,11 @@ def create_ui_components(root, config: dict):
 
     # Order of returned components is important.
     # Add new components to the end
+    # return [transcript_textbox, response_textbox, update_interval_slider,
+    #         update_interval_slider_label, continuous_response_button, lang_combobox,
+    #         filemenu, response_now_button, read_response_now_button, editmenu,
+    #         github_link, issue_link, summarize_button]
     return [transcript_textbox, response_textbox, update_interval_slider,
             update_interval_slider_label, continuous_response_button, lang_combobox,
-            filemenu, response_now_button, read_response_now_button, editmenu,
-            github_link, issue_link, summarize_button]
+            filemenu, response_now_button, regenerate_button, editmenu,
+            github_link, issue_link]

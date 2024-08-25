@@ -85,7 +85,7 @@ class GPTResponder:
 
         return collected_messages
 
-    def generate_response_from_transcript_no_check(self) -> str:
+    def generate_response_from_transcript_no_check(self, regenerate=False) -> str:
         """Ping LLM to get a suggested response right away.
            Gets a response even if the continuous suggestion option is disabled.
            Updates the conversation object with the response from LLM.
@@ -113,11 +113,20 @@ class GPTResponder:
                     length=constants.MAX_TRANSCRIPTION_PHRASES_FOR_LLM)
                 multiturn_prompt_api_message = prompts.create_multiturn_prompt(
                     multiturn_prompt_content)
+                if regenerate:
+                    for i in range(len(multiturn_prompt_api_message)-1, -1, -1):
+                        if multiturn_prompt_api_message[i]['role'] == 'assistant':
+                            time_spoken = multiturn_prompt_content[i][1]
+                            multiturn_prompt_api_message = multiturn_prompt_api_message[:i]
+                            break
                 # Multi turn response is very effective when continuous mode is off.
                 # In continuous mode, there are far too many responses from LLM.
                 # They can confuse the LLM if that many responses are replayed back to LLM.
-                # print(f'{datetime.datetime.now()} - Request response')
-                # self._pretty_print_openai_request(multiturn_prompt_api_message)
+                print(f'{datetime.datetime.now()} - Request response')
+                print(multiturn_prompt_content)
+                print('++++++')
+                self._pretty_print_openai_request(multiturn_prompt_api_message)
+                print('#'*80)
                 multi_turn_response = self.llm_client.chat.completions.create(
                     model=self.model,
                     messages=multiturn_prompt_api_message,
@@ -130,13 +139,19 @@ class GPTResponder:
 
                 # Update conversation with an empty response. This response will be updated
                 # by subsequent updates from the streaming response
+                if regenerate:
+                    pop = True
+                else:
+                    pop = False
+                    time_spoken = datetime.datetime.utcnow()
                 self._update_conversation(persona=constants.PERSONA_ASSISTANT,
-                                          response="  ", pop=False)
+                                          response="  ", time_spoken=time_spoken, pop=pop)
                 collected_messages = ""
                 for chunk in multi_turn_response:
                     if self.global_vars_module.interrupt_generation:
                         self._update_conversation(persona=constants.PERSONA_ASSISTANT,
-                                                  response=collected_messages, pop=True, interrupt=True)
+                                                  response=collected_messages, 
+                                                  time_spoken=time_spoken, pop=True, interrupt=True)
                         return "Response generation interrupted."
                     chunk_message = chunk.choices[0].delta  # extract the message
                     if chunk_message.content:
@@ -144,7 +159,8 @@ class GPTResponder:
                         collected_messages += message_text
                         # print(f"{message_text}", end="")
                         self._update_conversation(persona=constants.PERSONA_ASSISTANT,
-                                                  response=collected_messages, pop=True)
+                                                  response=collected_messages, 
+                                                  time_spoken=time_spoken, pop=True)
 
         except Exception as exception:
             print('Error when attempting to get a response from LLM.')
@@ -252,14 +268,15 @@ class GPTResponder:
 
         return processed_response
 
-    def _update_conversation(self, response, persona, pop=False, interrupt=False):
+    def _update_conversation(self, response, persona, 
+                             time_spoken=datetime.datetime.utcnow(), pop=False, interrupt=False):
         """Update the internaal conversation state"""
         root_logger.info(GPTResponder._update_conversation.__name__)
         if response != '':
             self.response = response
             self.conversation.update_conversation(persona=persona,
                                                   text=response,
-                                                  time_spoken=datetime.datetime.utcnow(),
+                                                  time_spoken=time_spoken,
                                                   pop=pop, interrupt=interrupt)
 
     def respond_to_transcriber(self, transcriber):

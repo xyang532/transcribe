@@ -122,13 +122,17 @@ class Conversation:
            Initial summary prompt is always part of the return value
            Default value = 0, gives the complete transcript
         """
+        you_transcript = self.transcript_data[constants.PERSONA_YOU]
+        speaker_transcript = self.transcript_data[constants.PERSONA_SPEAKER]
+        assistant_transcript = self.transcript_data[constants.PERSONA_ASSISTANT]
 
-        combined_transcript = self.transcript_data[constants.PERSONA_YOU][-length:] \
-            + self.transcript_data[constants.PERSONA_SPEAKER][-length:] \
-            + self.transcript_data[constants.PERSONA_ASSISTANT][-length:]
+        combined_transcript = you_transcript[0:1] \
+            + you_transcript[max(1, len(you_transcript) - length):] \
+            + speaker_transcript[-length:] \
+            + assistant_transcript[-length:]
         sorted_transcript = sorted(combined_transcript, key=lambda x: x[1])
         sorted_transcript = sorted_transcript[-length:]
-        sorted_transcript.insert(0, self.transcript_data[constants.PERSONA_YOU][0])
+        # sorted_transcript.insert(0, self.transcript_data[constants.PERSONA_YOU][0])
         sorted_transcript.insert(0, self.transcript_data[constants.PERSONA_SYSTEM][0])
         # print(f'{datetime.datetime.now()}: Sorted transcript')
         # self._pretty_print_transcript(sorted_transcript)
