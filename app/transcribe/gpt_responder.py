@@ -122,11 +122,11 @@ class GPTResponder:
                 # Multi turn response is very effective when continuous mode is off.
                 # In continuous mode, there are far too many responses from LLM.
                 # They can confuse the LLM if that many responses are replayed back to LLM.
-                print(f'{datetime.datetime.now()} - Request response')
-                print(multiturn_prompt_content)
-                print('++++++')
-                self._pretty_print_openai_request(multiturn_prompt_api_message)
-                print('#'*80)
+                # print(f'{datetime.datetime.now()} - Request response')
+                # print(multiturn_prompt_content)
+                # print('++++++')
+                # self._pretty_print_openai_request(multiturn_prompt_api_message)
+                # print('#'*80)
                 multi_turn_response = self.llm_client.chat.completions.create(
                     model=self.model,
                     messages=multiturn_prompt_api_message,
