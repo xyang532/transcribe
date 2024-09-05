@@ -177,6 +177,12 @@ class GPTResponder:
 
         return processed_multi_turn_response
 
+    def clear_previous_responses(self):
+        """Clear previous responses from the conversation object
+        """
+        self.conversation.transcript_data[constants.PERSONA_ASSISTANT] = self.\
+            conversation.transcript_data[constants.PERSONA_ASSISTANT][0:1]
+
     def create_client(self, api_key: str, base_url: str = None):
         if self.llm_client is not None:
             self.llm_client.close()

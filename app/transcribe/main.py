@@ -69,14 +69,15 @@ def main():
     global_vars.response_textbox = ui_components[1]
     update_interval_slider = ui_components[2]
     global_vars.update_interval_slider_label = ui_components[3]
-    global_vars.freeze_button = ui_components[4]
-    lang_combobox = ui_components[5]
-    global_vars.filemenu = ui_components[6]
-    response_now_button = ui_components[7]
-    regenerate_button = ui_components[8]
-    global_vars.editmenu = ui_components[9]
-    github_link = ui_components[10]
-    issue_link = ui_components[11]
+    # global_vars.freeze_button = ui_components[4]
+    # lang_combobox = ui_components[4]
+    global_vars.filemenu = ui_components[4]
+    response_now_button = ui_components[5]
+    # regenerate_button = ui_components[8]
+    clear_previous_button = ui_components[6]
+    global_vars.editmenu = ui_components[7]
+    # github_link = ui_components[9]
+    # issue_link = ui_components[10]
     # summarize_button = ui_components[12]
 
     # disable speaker/microphone on startup
@@ -99,19 +100,20 @@ def main():
     root.grid_columnconfigure(0, weight=2)
     root.grid_columnconfigure(1, weight=1)
 
-    global_vars.freeze_button.configure(command=ui_cb.freeze_unfreeze)
+    # global_vars.freeze_button.configure(command=ui_cb.freeze_unfreeze)
     response_now_button.configure(command=ui_cb.get_response_now)
-    regenerate_button.configure(command=ui_cb.regenerate_response)
+    # regenerate_button.configure(command=ui_cb.regenerate_response)
+    clear_previous_button.configure(command=ui_cb.clear_previous_response)
     # read_response_now_button.configure(command=ui_cb.update_response_ui_and_read_now)
     # summarize_button.configure(command=ui_cb.summarize)
     update_interval_slider.configure(command=ui_cb.update_interval_slider_label)
     label_text = f'LLM Response interval: {int(update_interval_slider.get())} seconds'
     global_vars.update_interval_slider_label.configure(text=label_text)
-    lang_combobox.configure(command=global_vars.transcriber.stt_model.set_lang)
-    github_link.bind('<Button-1>', lambda e:
-                     ui_cb.open_link('https://github.com/vivekuppal/transcribe?referer=desktop'))
-    issue_link.bind('<Button-1>', lambda e: ui_cb.open_link(
-        'https://github.com/vivekuppal/transcribe/issues/new?referer=desktop'))
+    # lang_combobox.configure(command=global_vars.transcriber.stt_model.set_lang)
+    # github_link.bind('<Button-1>', lambda e:
+    #                  ui_cb.open_link('https://github.com/vivekuppal/transcribe?referer=desktop'))
+    # issue_link.bind('<Button-1>', lambda e: ui_cb.open_link(
+    #     'https://github.com/vivekuppal/transcribe/issues/new?referer=desktop'))
 
     ui.update_transcript_ui(global_vars.transcriber, global_vars.transcript_textbox)
     ui.update_response_ui(global_vars.responder, global_vars.response_textbox,

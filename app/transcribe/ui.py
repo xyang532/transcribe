@@ -141,6 +141,26 @@ class UICallbacks:
         self.global_vars.response_textbox.configure(state="disabled")
         # self.global_vars.response_textbox.see("end")
 
+    def clear_previous_response(self):
+        """Clear previous response from LLM and regenerate response
+        """
+        self.capture_action('Clear previous LLM response and regenerate')
+        response_ui_thread = threading.Thread(target=self.clear_previous_response_threaded,
+                                              name='ClearPreviousResponse')
+        response_ui_thread.daemon = True
+        response_ui_thread.start()
+    
+    def clear_previous_response_threaded(self):
+        self.global_vars.update_response_now = True
+        self.global_vars.responder.clear_previous_responses()
+        response_string = self.global_vars.responder.generate_response_from_transcript_no_check()
+        self.global_vars.update_response_now = False
+        self.global_vars.response_textbox.configure(state="normal")
+        if response_string is not None and response_string != '':
+            write_in_textbox(self.global_vars.response_textbox, response_string)
+        write_in_textbox(self.global_vars.response_textbox, response_string)
+        self.global_vars.response_textbox.configure(state="disabled")
+
     def get_response_selected_now(self):
         """Get response from LLM right away for selected_text
            Update the Response UI with the response
@@ -474,20 +494,25 @@ def create_ui_components(root, config: dict):
     response_textbox.grid(row=0, column=1, padx=10, pady=20, sticky="nsew")
     response_textbox.insert("0.0", prompts.INITIAL_RESPONSE)
 
-    response_enabled = bool(config['General']['continuous_response'])
-    b_text = "Suggest Responses Continuously" if not response_enabled else "Do Not Suggest Responses Continuously"
-    continuous_response_button = ctk.CTkButton(root, text=b_text, command=None)
-    continuous_response_button.grid(row=1, column=1, padx=10, pady=3, sticky="nsew")
+    # response_enabled = bool(config['General']['continuous_response'])
+    # b_text = "Suggest Responses Continuously" if not response_enabled else "Do Not Suggest Responses Continuously"
+    # continuous_response_button = ctk.CTkButton(root, text=b_text, command=None)
+    # continuous_response_button.grid(row=1, column=1, padx=10, pady=3, sticky="nsew")
 
     response_now_button = ctk.CTkButton(root, text="Suggest Response Now", command=None)
-    response_now_button.grid(row=2, column=1, padx=10, pady=3, sticky="nsew")
+    response_now_button.grid(row=1, column=1, padx=10, pady=3, sticky="nsew", rowspan=2)
 
-    regenerate_button = ctk.CTkButton(root, text="Regenerate Response", command=None)
-    regenerate_button.grid(row=3, column=1, padx=10, pady=3, sticky="nsew")
+    # regenerate_button = ctk.CTkButton(root, text="Regenerate Response", command=None)
+    # regenerate_button.grid(row=3, column=1, padx=10, pady=3, sticky="nsew")
+
+    clear_previous_button = ctk.CTkButton(root, text="Clear Previous and Response", command=None, height=70)
+    clear_previous_button.grid(row=3, column=1, padx=10, pady=(3, 10), sticky="nsew", rowspan=2)
 
     clear_transcript_button = ctk.CTkButton(root, text="Clear Audio Transcript",
-                                            command=lambda: global_vars.transcriber.clear_transcriber_context(global_vars.audio_queue))
-    clear_transcript_button.grid(row=4, column=1, padx=10, pady=3, sticky="nsew")
+                                            command=lambda: global_vars.transcriber.clear_transcriber_context(global_vars.audio_queue),
+                                            height=70)
+    clear_transcript_button.grid(row=3, column=0, padx=10, pady=(3, 10), sticky="nsew", rowspan=2)
+
 
     # read_response_now_button = ctk.CTkButton(root, text="Suggest Response and Read", command=None)
     # read_response_now_button.grid(row=5, column=1, padx=10, pady=3, sticky="nsew")
@@ -504,15 +529,15 @@ def create_ui_components(root, config: dict):
     update_interval_slider.set(config['General']['response_interval'])
     update_interval_slider.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
 
-    lang_combobox = ctk.CTkOptionMenu(root, width=15, values=list(LANGUAGES_DICT.values()))
-    lang_combobox.grid(row=3, column=0, ipadx=60, padx=10, sticky="wn")
+    # lang_combobox = ctk.CTkOptionMenu(root, width=15, values=list(LANGUAGES_DICT.values()))
+    # lang_combobox.grid(row=3, column=0, ipadx=60, padx=3, sticky="wn")
 
-    github_link = ctk.CTkLabel(root, text="Star the Github Repo",
-                               text_color="#639cdc", cursor="hand2")
-    github_link.grid(row=3, column=0, padx=10, pady=10, sticky="n")
+    # github_link = ctk.CTkLabel(root, text="Star the Github Repo",
+    #                            text_color="#639cdc", cursor="hand2")
+    # github_link.grid(row=3, column=0, padx=10, pady=3, sticky="n")
 
-    issue_link = ctk.CTkLabel(root, text="Report an issue", text_color="#639cdc", cursor="hand2")
-    issue_link.grid(row=3, column=0, padx=10, pady=10, sticky="en")
+    # issue_link = ctk.CTkLabel(root, text="Report an issue", text_color="#639cdc", cursor="hand2")
+    # issue_link.grid(row=3, column=0, padx=10, pady=3, sticky="en")
 
     # Create right click menu for transcript textbox
     m = tk.Menu(root, tearoff=0)
@@ -537,9 +562,9 @@ def create_ui_components(root, config: dict):
 
     if not utilities.is_api_key_valid(api_key=api_key, base_url=base_url, model=model):
         # Disable buttons that interact with backend services
-        continuous_response_button.configure(state='disabled')
+        # continuous_response_button.configure(state='disabled')
         response_now_button.configure(state='disabled')
-        continuous_response_button.configure(state='disabled')
+        clear_previous_button.configure(state='disabled')
         clear_transcript_button.configure(state='disabled')
         # read_response_now_button.configure(state='disabled')
         # summarize_button.configure(state='disabled')
@@ -559,6 +584,5 @@ def create_ui_components(root, config: dict):
     #         filemenu, response_now_button, read_response_now_button, editmenu,
     #         github_link, issue_link, summarize_button]
     return [transcript_textbox, response_textbox, update_interval_slider,
-            update_interval_slider_label, continuous_response_button, lang_combobox,
-            filemenu, response_now_button, regenerate_button, editmenu,
-            github_link, issue_link]
+            update_interval_slider_label, filemenu, response_now_button, 
+            clear_previous_button, editmenu]
