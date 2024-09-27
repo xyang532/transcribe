@@ -489,7 +489,7 @@ def create_ui_components(root, config: dict):
                                         text_color='#FFFCF2', wrap="word")
     transcript_textbox.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")
 
-    response_textbox = ctk.CTkTextbox(root, width=300, font=("Arial", UI_FONT_SIZE),
+    response_textbox = ctk.CTkTextbox(root, width=500, font=("Arial", UI_FONT_SIZE),
                                       text_color='#639cdc', wrap="word")
     response_textbox.grid(row=0, column=1, padx=10, pady=20, sticky="nsew")
     response_textbox.insert("0.0", prompts.INITIAL_RESPONSE)
