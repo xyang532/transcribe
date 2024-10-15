@@ -74,7 +74,7 @@ def main():
     global_vars.filemenu = ui_components[4]
     response_now_button = ui_components[5]
     # regenerate_button = ui_components[8]
-    clear_previous_button = ui_components[6]
+    pure_response_button = ui_components[6]
     global_vars.editmenu = ui_components[7]
     # github_link = ui_components[9]
     # issue_link = ui_components[10]
@@ -103,7 +103,7 @@ def main():
     # global_vars.freeze_button.configure(command=ui_cb.freeze_unfreeze)
     response_now_button.configure(command=ui_cb.get_response_now)
     # regenerate_button.configure(command=ui_cb.regenerate_response)
-    clear_previous_button.configure(command=ui_cb.clear_previous_response)
+    pure_response_button.configure(command=ui_cb.pure_response)
     # read_response_now_button.configure(command=ui_cb.update_response_ui_and_read_now)
     # summarize_button.configure(command=ui_cb.summarize)
     update_interval_slider.configure(command=ui_cb.update_interval_slider_label)

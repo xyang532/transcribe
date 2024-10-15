@@ -178,7 +178,7 @@ class GPTResponder:
         return processed_multi_turn_response
 
     def clear_previous_responses(self):
-        """Clear previous responses from the conversation object
+        """Clear all previous responses from the conversation object
         """
         self.conversation.transcript_data[constants.PERSONA_ASSISTANT] = self.\
             conversation.transcript_data[constants.PERSONA_ASSISTANT][0:1]

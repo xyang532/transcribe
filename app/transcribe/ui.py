@@ -141,20 +141,30 @@ class UICallbacks:
         self.global_vars.response_textbox.configure(state="disabled")
         # self.global_vars.response_textbox.see("end")
 
-    def clear_previous_response(self):
-        """Clear previous response from LLM and regenerate response
+    def pure_response(self):
+        """Clear all previous response from LLM and regenerate response
         """
+        global global_vars_module
+        if self.global_vars.update_response_now:
+            # We are already in the middle of getting a response
+            global_vars_module.interrupt_generation = True
+            while global_vars_module.interrupt_generation:
+                time.sleep(0.5)
+
         self.capture_action('Clear previous LLM response and regenerate')
-        response_ui_thread = threading.Thread(target=self.clear_previous_response_threaded,
+        response_ui_thread = threading.Thread(target=self.pure_response_threaded,
                                               name='ClearPreviousResponse')
         response_ui_thread.daemon = True
         response_ui_thread.start()
     
-    def clear_previous_response_threaded(self):
+    def pure_response_threaded(self):
         self.global_vars.update_response_now = True
         self.global_vars.responder.clear_previous_responses()
         response_string = self.global_vars.responder.generate_response_from_transcript_no_check()
         self.global_vars.update_response_now = False
+        if global_vars_module.interrupt_generation:
+            global_vars_module.interrupt_generation = False
+            return
         self.global_vars.response_textbox.configure(state="normal")
         if response_string is not None and response_string != '':
             write_in_textbox(self.global_vars.response_textbox, response_string)
@@ -505,8 +515,8 @@ def create_ui_components(root, config: dict):
     # regenerate_button = ctk.CTkButton(root, text="Regenerate Response", command=None)
     # regenerate_button.grid(row=3, column=1, padx=10, pady=3, sticky="nsew")
 
-    clear_previous_button = ctk.CTkButton(root, text="Clear Previous and Response", command=None, height=70)
-    clear_previous_button.grid(row=3, column=1, padx=10, pady=(3, 10), sticky="nsew", rowspan=2)
+    pure_response_button = ctk.CTkButton(root, text="Pure Response", command=None, height=70)
+    pure_response_button.grid(row=3, column=1, padx=10, pady=(3, 10), sticky="nsew", rowspan=2)
 
     clear_transcript_button = ctk.CTkButton(root, text="Clear Audio Transcript",
                                             command=lambda: global_vars.transcriber.clear_transcriber_context(global_vars.audio_queue),
@@ -564,7 +574,7 @@ def create_ui_components(root, config: dict):
         # Disable buttons that interact with backend services
         # continuous_response_button.configure(state='disabled')
         response_now_button.configure(state='disabled')
-        clear_previous_button.configure(state='disabled')
+        pure_response_button.configure(state='disabled')
         clear_transcript_button.configure(state='disabled')
         # read_response_now_button.configure(state='disabled')
         # summarize_button.configure(state='disabled')
@@ -585,4 +595,4 @@ def create_ui_components(root, config: dict):
     #         github_link, issue_link, summarize_button]
     return [transcript_textbox, response_textbox, update_interval_slider,
             update_interval_slider_label, filemenu, response_now_button, 
-            clear_previous_button, editmenu]
+            pure_response_button, editmenu]
